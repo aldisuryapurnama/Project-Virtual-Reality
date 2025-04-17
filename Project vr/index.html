@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Kamar Tidur VR Interaktif</title>
+    <meta charset="utf-8" />
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene background="color: #ECECEC">
+      <a-assets>
+        <a-asset-item id="roomModel" src="assets/models/apartment_living_room_with_balcony.glb"></a-asset-item>
+        <a-asset-item id="bedModel" src="assets/models/bed.glb"></a-asset-item>
+        <a-asset-item id="tableModel" src="assets/models/gaming_table.glb"></a-asset-item>
+        <a-asset-item id="chairModel" src="assets/models/gaming_chair.glb"></a-asset-item>
+        <a-asset-item id="pcModel" src="assets/models/programmer_desktop_3d_pc.glb"></a-asset-item>
+        <a-asset-item id="curtainsModel" src="assets/models/curtains.glb"></a-asset-item>
+        <a-asset-item id="ceilingLightModel" src="assets/models/star_ceiling_light.glb"></a-asset-item>
+        <audio id="musik" src="assets/sounds/music.mp3"></audio>
+      </a-assets>
+      <!-- Kamera + Cursor -->
+        <a-entity id="cameraRig" position="0 2.5 -4" rotation="0 180 0">
+            <a-camera id="mainCamera" camera="zoom: 1" wasd-controls look-controls>
+            <a-cursor
+                fuse="false"
+                rayOrigin="mouse"
+                material="color: black; shader: flat">
+            </a-cursor>
+            </a-camera>
+        </a-entity>
+  
+      
+
+      <!-- Cahaya -->
+      <a-entity light="type: ambient; intensity: 0.5"></a-entity>
+      <a-entity light="type: directional; intensity: 0.8" position="0 4 4"></a-entity>
+
+      <!-- Ruangan -->
+      <a-entity gltf-model="#roomModel" position="0 0 0" scale="0.04 0.04 0.04"></a-entity>
+
+      <!-- Tempat Tidur -->
+      <a-entity gltf-model="#bedModel" position="-8 0.01 1.9" rotation="0 90 0" scale="4 4 4"></a-entity>
+
+      <!-- Meja -->
+      <a-entity gltf-model="#tableModel" position="0 2.6 5" rotation="0 180 0" scale="3.5 3.5 3.5"></a-entity>
+
+      <!-- Kursi -->
+      <a-entity gltf-model="#chairModel" position="0 0.01 2" scale="2.5 2.5 2.5"></a-entity>
+
+      <!-- PC (dengan audio) -->
+      <a-entity id="pcEntity" gltf-model="#pcModel" position="-0.5 2.7 5" rotation="0 180 0" scale="0.3 0.3 0.3"
+                sound="src: #musik; autoplay: false; loop: true"></a-entity>
+
+      <!-- Gorden -->
+      <a-entity id="gorden" gltf-model="#curtainsModel" position="5.9 0.6 -1.14" rotation="0 90 0" scale="0.035 0.035 0.035">
+        <a-animation begin="buka" attribute="position" to="6.5 0.6 -1.14" dur="1000" fill="forwards"></a-animation>
+        <a-animation begin="tutup" attribute="position" to="5.9 0.6 -1.14" dur="1000" fill="forwards"></a-animation>
+      </a-entity>
+
+      <!-- Lampu Gantung -->
+      <a-entity id="lampu" gltf-model="#ceilingLightModel" position="-15 7 0" scale="1 1 1"
+                light="type: point; intensity: 0.5; distance: 5; decay: 2"></a-entity>
+
+      <!-- 🔘 Bola Interaksi -->
+
+      <!-- Klik untuk nyalakan lampu -->
+      <a-sphere id="btnLampu" position="-15 6.8 0" radius="0.05" color="#ffff00" emissive="#ffff00"
+                toggle-lampu class="klik"></a-sphere>
+
+      <!-- Klik untuk play/pause musik -->
+      <a-sphere id="btnPC" position="-0.5 3 5" radius="0.05" color="#00ff00" emissive="#00ff00"
+                toggle-musik class="klik"></a-sphere>
+    </a-scene>
+
+    <!-- Komponen Interaksi -->
+    <script>
+      let lampuNyala = true;
+      let musikMain = false;
+
+      AFRAME.registerComponent('toggle-lampu', {
+        init: function () {
+          this.el.addEventListener('click', function () {
+            const lampu = document.querySelector('#lampu');
+            lampuNyala = !lampuNyala;
+            lampu.setAttribute('light', 'intensity', lampuNyala ? 20 : 0);
+          });
+        }
+      });
+
+      AFRAME.registerComponent('toggle-musik', {
+        init: function () {
+          this.el.addEventListener('click', function () {
+            const pc = document.querySelector('#pcEntity');
+            musikMain ? pc.components.sound.pauseSound() : pc.components.sound.playSound();
+            musikMain = !musikMain;
+          });
+        }
+      });
+
+      const cameraEl = document.querySelector('#mainCamera');
+        const rigEl = document.querySelector('#cameraRig');
+  
+        let zoomLevel = 1;
+        let yPos = 1.6;
+  
+        // Zoom pakai scroll
+        window.addEventListener('wheel', function (e) {
+          if (e.deltaY < 0) {
+            zoomLevel = Math.max(0.5, zoomLevel - 0.1);
+          } else {
+            zoomLevel = Math.min(5, zoomLevel + 0.1);
+          }
+          cameraEl.setAttribute('camera', 'zoom', zoomLevel);
+        });
+    </script>
+  </body>
+</html>
